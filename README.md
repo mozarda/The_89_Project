@@ -2,96 +2,124 @@
 
 > Ya ayyuhalladhina amanu - O you who believe
 
-A simple, clean Node.js blog ready for deployment at **blogs.rosyada.my.id**.
+A clean, simple blog built for **Cloudflare Pages** static hosting.
 
 ## ✨ Features
 
-- Minimal, responsive design
-- Markdown-like content with line breaks
-- Admin panel for creating/deleting posts
-- JSON file storage (easy to backup/migrate)
-- Dynamic sitemap.xml for SEO
-- RESTful API
-- No database required for small blogs
+- Static HTML generated from JSON posts (fast, cheap)
+- Markdown-like content (line breaks preserved)
+- Clean URLs with redirects
+- No database needed
+- Automatic sitemap.xml
+- Admin-ReadOnly view (edit JSON directly in Git)
 
-## 🚀 Quick Start
+## 🛠️ Tech Stack
+
+- **Node.js** scripts for building
+- **Express** only for local dev (optional)
+- **EJS** templating
+- **Cloudflare Pages** for hosting
+
+## 🚀 Quick Start (Local Dev)
 
 ```bash
 # Install dependencies
 npm install
 
-# Run the development server
+# Run development server (dynamic version)
 npm start
 ```
+→ http://localhost:3000
 
-Then open: http://localhost:3000
+**Note:** The dynamic server is for testing only. Production uses static build.
 
-- **Homepage**: View published posts
-- **Admin panel**: http://localhost:3000/admin
-- **API**: http://localhost:3000/api/posts
+## 🔨 Build for Production
 
-## 📝 Creating Posts
+```bash
+npm run build
+```
 
-1. Visit `/admin` in your browser
-2. Fill in:
-   - **Title** (required)
-   - **Excerpt** (optional, auto-generated if empty)
-   - **Content** (required, line breaks preserved)
-3. Click **Publish** → post appears on homepage instantly
+This generates the `dist/` folder (static HTML, CSS, JS). Upload `dist/` to Cloudflare Pages.
+
+## 📝 Writing Posts
+
+Because this is a static site, posts are stored in `data/posts.json`.
+
+To add a post:
+
+1. Copy an existing entry in `data/posts.json`
+2. Increment `id`, set `title`, generate `slug` (lowercase, hyphens)
+3. Write `excerpt` and `content` (use `\n` for line breaks)
+4. Set `date` in ISO format (`YYYY-MM-DDTHH:mm:ss.sssZ`)
+5. Ensure `"published": true`
+6. Run `npm run build` and commit
+
+Example:
+```json
+{
+  "id": 2,
+  "title": "My Second Post",
+  "slug": "my-second-post",
+  "excerpt": "A brief summary...",
+  "content": "Hello world\nThis is line two.",
+  "date": "2025-02-22T10:30:00.000Z",
+  "published": true
+}
+```
 
 ## 🗂️ Project Structure
 
 ```
 The_89_Project/
 ├── src/
-│   ├── server.js          # Express app + routes
-│   ├── views/
-│   │   ├── partials/      # Header & footer
-│   │   ├── index.ejs      # Homepage
-│   │   ├── post.ejs       # Single post view
-│   │   ├── admin.ejs      # Admin panel
-│   │   └── 404.ejs        # Not found page
+│   ├── server.js      # Dynamic dev server (Express)
+│   ├── build.js       # Static site generator
+│   ├── views/         # EJS templates
+│   │   ├── partials/
+│   │   ├── index.ejs
+│   │   ├── post.ejs
+│   │   ├── admin.ejs  # Read-only listing
+│   │   └── 404.ejs
 │   └── public/
-│       ├── style.css      # Styling
-│       └── robots.txt     # SEO
+│       ├── style.css
+│       └── _redirects
 ├── data/
-│   └── posts.json         # Your blog posts (back this up!)
+│   └── posts.json     # Your blog content (edit this)
+├── dist/              # Build output (gitignore)
 ├── docs/
-│   └── DEPLOY.md          # Deployment instructions
+│   └── DEPLOY.md      # Full deployment guide
 ├── tests/
-│   └── run.js             # Basic tests
+│   └── run.js
+├── .gitignore
 └── package.json
 ```
 
-## 🌐 Deployment to blogs.rosyada.my.id
+## 🌐 Deploy to Cloudflare Pages
 
-See **[docs/DEPLOY.md](./docs/DEPLOY.md)** for:
+1. Push to GitHub (already connected)
+2. In Cloudflare Pages, create project from `mozarda/The_89_Project`
+3. Build settings:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+4. Add custom domain `blogs.rosyada.my.id`
+5. Done — automatic deploys on every push to `main`
 
-- Server setup
-- PM2 process management
-- Nginx reverse proxy
-- SSL (HTTPS) with Let's Encrypt
+Detailed steps: [docs/DEPLOY.md](./docs/DEPLOY.md)
+
+## 🔐 About Admin
+
+The `admin.html` page in the static build is **read-only**. There is no server to handle form submissions. To manage posts:
+
+- Edit `data/posts.json` directly in the repository
+- Commit changes → triggers rebuild → live
+
+For a full dynamic admin, you'd need a backend (Workers + D1/KV). That's possible but adds complexity. For a personal blog, editing JSON is fine.
 
 ## 🔧 Customization
 
-- **Colors & styling**: Edit `src/public/style.css` (CSS variables in `:root`)
+- **Theme colors**: Edit CSS variables in `src/public/style.css`
 - **Templates**: Modify EJS files in `src/views/`
-- **Domain**: Set your domain in the reverse proxy config
-
-## 🔐 Security Note
-
-The admin panel has no authentication. For a personal blog on a private server, this may be acceptable. If the server is publicly accessible, consider adding:
-
-- HTTP Basic Auth (nginx)
-- Login session system (future enhancement)
-- IP whitelist
-
-## 📦 Dependencies
-
-- `express` — Web framework
-- `ejs` — Templating
-- `slugify` — URL slugs from titles
-- `marked` — Markdown parser (available for later use)
+- **Markdown**: Currently plain text; can add `marked` parser in build step if desired
 
 ## 🧪 Testing
 
@@ -99,23 +127,14 @@ The admin panel has no authentication. For a personal blog on a private server, 
 npm test
 ```
 
-Runs basic module and HTTP checks.
+Runs basic checks on server module and HTTP endpoints (dev server only).
 
-## 📚 Future Improvements
+## 📦 Dependencies
 
-- [ ] Add markdown rendering (currently plain text with line breaks)
-- [ ] Image upload support
-- [ ] Draft/publish scheduling
-- [ ] Search functionality
-- [ ] RSS feed
-- [ ] Database migration (PostgreSQL/MongoDB)
-- [ ] Authentication for admin
-- [ ] Syntax highlighting for code blocks
-- [ ] Comments section
-
-## 💾 Backup
-
-Your content lives in `data/posts.json`. Regular backups of this file are essential before migration or server changes.
+- `express` — dev server (optional for production)
+- `ejs` — templating
+- `slugify` — URL-safe slugs
+- `marked` — (available) for markdown
 
 ## 📄 License
 

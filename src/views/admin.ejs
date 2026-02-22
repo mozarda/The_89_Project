@@ -2,50 +2,34 @@
 
 <section class="admin-section">
   <div class="container">
-    <h1>Admin Panel</h1>
-
-    <div class="admin-create">
-      <h2>Create New Post</h2>
-      <form action="/admin/posts" method="POST">
-        <div class="form-group">
-          <label for="title">Title</label>
-          <input type="text" id="title" name="title" required>
-        </div>
-        <div class="form-group">
-          <label for="excerpt">Excerpt (optional)</label>
-          <textarea id="excerpt" name="excerpt" rows="2" placeholder="Short summary..."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="content">Content</label>
-          <textarea id="content" name="content" rows="10" required placeholder="Write your post content here..."></textarea>
-        </div>
-        <button type="submit" class="btn-primary">Publish</button>
-      </form>
-    </div>
+    <h1>Admin Panel (Read-Only)</h1>
+    <p class="admin-note">
+      This is a static build. To add/edit posts, edit <code>data/posts.json</code> in the repository and rebuild.
+      <br>
+      Command: <code>npm run build</code> then push to trigger Cloudflare Pages deploy.
+    </p>
 
     <div class="admin-posts">
       <h2>All Posts (<%= posts.length %>)</h2>
       <% if (posts.length === 0) { %>
-        <p>No posts yet.</p>
+        <p>No posts yet. Add entries to data/posts.json.</p>
       <% } else { %>
         <table class="posts-table">
           <thead>
             <tr>
               <th>Title</th>
+              <th>Slug</th>
               <th>Date</th>
-              <th>Actions</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             <% posts.forEach(post => { %>
               <tr>
                 <td><a href="/post/<%= post.slug %>" target="_blank"><%= post.title %></a></td>
+                <td><code><%= post.slug %></code></td>
                 <td><%= new Date(post.date).toLocaleDateString() %></td>
-                <td>
-                  <form action="/admin/posts/<%= post.id %>/delete" method="POST" style="display:inline;">
-                    <button type="submit" class="btn-danger" onclick="return confirm('Delete this post?')">Delete</button>
-                  </form>
-                </td>
+                <td><%= post.published ? '✅ Published' : '⚪ Draft' %></td>
               </tr>
             <% }) %>
           </tbody>

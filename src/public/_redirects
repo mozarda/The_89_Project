@@ -1,0 +1,7 @@
+# Cloudflare Pages redirects
+
+# Ensure clean URLs for posts: /post/slug -> /post/slug/
+/post/*  /post/:suffix/  200
+
+# Optional: redirect www to non-www if needed
+# www.blogs.rosyada.my.id/*  https://blogs.rosyada.my.id/:splat  301
