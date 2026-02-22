@@ -82,7 +82,7 @@ function copyRecursive(src, dest) {
   console.log('🏗️  Building static site...\n');
 
   // Build pages
-  await renderTemplate('index.ejs', 'index.html', { posts });
+  await renderTemplate('index.ejs', 'index.html', { posts, allPosts: posts });
   await Promise.all(posts.map(post => {
     const contentHtml = marked.parse(post.content);
     return renderTemplate('post.ejs', `post/${post.slug}/index.html`, {
@@ -90,7 +90,7 @@ function copyRecursive(src, dest) {
       allPosts: posts
     });
   }));
-  await renderTemplate('404.ejs', '404.html', {});
+  await renderTemplate('404.ejs', '404.html', { allPosts: posts });
 
   // Copy public assets
   copyRecursive(PUBLIC_DIR, path.join(DIST, ''));
