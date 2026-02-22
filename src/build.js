@@ -6,7 +6,13 @@
 const ejs = require('ejs');
 const fs = require('fs');
 const path = require('path');
-const { marked } = require('marked');
+const marked = require('marked');
+
+// Marked options (GFM + line breaks)
+marked.setOptions({
+  breaks: true,
+  gfm: true
+});
 
 // Clean dist folder
 const ROOT = path.join(__dirname, '..');
@@ -15,12 +21,6 @@ if (fs.existsSync(DIST)) {
   fs.rmSync(DIST, { recursive: true, force: true });
 }
 fs.mkdirSync(DIST, { recursive: true });
-
-// Marked options (GFM + line breaks)
-marked.setOptions({
-  breaks: true,
-  gfm: true
-});
 
 const VIEWS_DIR = path.join(ROOT, 'src', 'views');
 const PUBLIC_DIR = path.join(ROOT, 'src', 'public');
@@ -51,7 +51,9 @@ console.log('🏗️  Building static site...\n');
 // Build pages
 renderTemplate('index.ejs', 'index.html', { posts });
 posts.forEach(post => {
-  renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post });
+  const contentHtml = marked.parse(post.content);
+  const postWithHtml = { ...post, content: contentHtml };
+  renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post: postWithHtml });
 });
 renderTemplate('admin.ejs', 'admin.html', { posts });
 renderTemplate('404.ejs', '404.html', {});
