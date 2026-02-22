@@ -1,0 +1,42 @@
+<aside class="site-sidebar">
+    <div class="sidebar-widget">
+        <h3 class="widget-title">🔔 Tulisan Terbaru</h3>
+        <ul class="widget-posts-list">
+            <% const sidebarPosts=(typeof allPosts !=='undefined' ? allPosts : posts) || []; sidebarPosts.slice(0,
+                5).forEach(p=> {
+                %>
+                <li class="widget-post-item">
+                    <a href="/post/<%= p.slug %>" class="widget-post-link">
+                        <%= p.title %>
+                    </a>
+                    <div class="widget-post-date">
+                        <%= new Date(p.date).toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                            year: 'numeric' }) %>
+                    </div>
+                </li>
+                <% }) %>
+        </ul>
+    </div>
+
+    <div class="sidebar-widget">
+        <h3 class="widget-title">📚 Arsip Tulisan</h3>
+        <ul class="widget-posts-list">
+            <% if (sidebarPosts.length> 5) {
+                sidebarPosts.slice(5, 10).forEach(p => {
+                %>
+                <li class="widget-post-item">
+                    <a href="/post/<%= p.slug %>" class="widget-post-link">
+                        <%= p.title %>
+                    </a>
+                    <div class="widget-post-date">
+                        <%= new Date(p.date).toLocaleDateString('id-ID', { month: 'short' , year: 'numeric' }) %>
+                    </div>
+                </li>
+                <% }); } else { %>
+                    <li class="widget-post-item" style="color: var(--text-muted); font-size: 0.9rem;">
+                        Belum ada riwayat tulisan lama...
+                    </li>
+                    <% } %>
+        </ul>
+    </div>
+</aside>

@@ -1,27 +1,35 @@
-<%- include('partials/header', { title: 'Home' }) %>
+<%- include('partials/header', { title: 'Beranda' }) %>
 
-<section class="hero">
-  <div class="container">
-    <h1>Welcome</h1>
-    <p class="tagline">Ya ayyuhalladhina amanu - O you who believe</p>
-  </div>
-</section>
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="calligraphy-text">
+        يَا أَيُّهَا الَّذِينَ آمَنُوا</h1>
+      <p class="tagline">Menyahut Panggilan Iman, Menata Hati Memetik Hikmah</p>
+    </div>
+  </section>
 
-<section class="posts-list">
-  <div class="container">
-    <% if (posts.length === 0) { %>
-      <p class="no-posts">No posts yet. <a href="/admin">Create one</a>!</p>
-    <% } else { %>
-      <% posts.forEach(post => { %>
-        <article class="post-card">
-          <h2><a href="/post/<%= post.slug %>"><%= post.title %></a></h2>
-          <p class="post-date"><%= new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
-          <p class="post-excerpt"><%= post.excerpt %></p>
-          <a href="/post/<%= post.slug %>" class="read-more">Read more →</a>
-        </article>
-      <% }) %>
-    <% } %>
-  </div>
-</section>
+  <section class="posts-list">
+    <% if (posts.length===0) { %>
+      <div class="no-posts">
+        <p>Perjalanan baru dimulai. Belum ada tulisan saat ini.</p>
+      </div>
+      <% } else { %>
+        <% posts.forEach(post=> { %>
+          <article class="post-card">
+            <div class="post-meta">
+              <span>📅 <%= new Date(post.date).toLocaleDateString('id-ID', { year: 'numeric' , month: 'long' ,
+                  day: 'numeric' }) %></span>
+            </div>
+            <h2><a href="/post/<%= post.slug %>">
+                <%= post.title %>
+              </a></h2>
+            <p class="post-excerpt">
+              <%= post.excerpt %>
+            </p>
+            <a href="/post/<%= post.slug %>" class="read-more">Baca Selengkapnya <span>→</span></a>
+          </article>
+          <% }) %>
+            <% } %>
+  </section>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>

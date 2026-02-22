@@ -85,9 +85,11 @@ function copyRecursive(src, dest) {
   await renderTemplate('index.ejs', 'index.html', { posts });
   await Promise.all(posts.map(post => {
     const contentHtml = marked.parse(post.content);
-    return renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post: { ...post, content: contentHtml } });
+    return renderTemplate('post.ejs', `post/${post.slug}/index.html`, {
+      post: { ...post, content: contentHtml },
+      allPosts: posts
+    });
   }));
-  await renderTemplate('admin.ejs', 'admin.html', { posts });
   await renderTemplate('404.ejs', '404.html', {});
 
   // Copy public assets
@@ -123,6 +125,13 @@ function copyRecursive(src, dest) {
 </urlset>`;
   fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemap);
   console.log('✓ sitemap.xml');
+
+  // Generate robots.txt
+  const robots = `User-agent: *
+Allow: /
+Sitemap: ${baseUrl}/sitemap.xml`;
+  fs.writeFileSync(path.join(DIST, 'robots.txt'), robots);
+  console.log('✓ robots.txt');
 
   console.log('\n✅ Build complete! The dist/ folder is ready for Cloudflare Pages.');
 })().catch(err => {
