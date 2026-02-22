@@ -20,13 +20,13 @@
               <span>📅 <%= new Date(post.date).toLocaleDateString('id-ID', { year: 'numeric' , month: 'long' ,
                   day: 'numeric' }) %></span>
             </div>
-            <h2><a href="/post/<%= post.slug %>">
+            <h2><a href="/post/<%= post.slug %>/">
                 <%= post.title %>
               </a></h2>
             <p class="post-excerpt">
               <%= post.excerpt %>
             </p>
-            <a href="/post/<%= post.slug %>" class="read-more">Baca Selengkapnya <span>→</span></a>
+            <a href="/post/<%= post.slug %>/" class="read-more">Baca Selengkapnya <span>→</span></a>
           </article>
           <% }) %>
             <% } %>
