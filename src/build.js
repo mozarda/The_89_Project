@@ -7,9 +7,8 @@ const ejs = require('ejs');
 const fs = require('fs');
 const path = require('path');
 const { marked } = require('marked');
-const hljs = require('highlight.js');
 
-// Clean dist folder (remove if exists)
+// Clean dist folder
 const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 if (fs.existsSync(DIST)) {
@@ -17,26 +16,10 @@ if (fs.existsSync(DIST)) {
 }
 fs.mkdirSync(DIST, { recursive: true });
 
-// Configure marked with markdown + highlight
+// Marked options (GFM + line breaks)
 marked.setOptions({
-  breaks: true, // single newlines become <br>
-  gfm: true, // GitHub Flavored Markdown
-  highlight: (code, lang) => {
-    let result;
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        result = hljs.highlight(code, { language: lang }).value;
-      } catch (e) {
-        result = hljs.highlightAuto(code).value;
-      }
-    } else {
-      result = hljs.highlightAuto(code).value;
-    }
-    // Strip <code class="hljs ..."> wrapper, keep inner spans
-    // hljs returns `<code class="hljs ...">...</code>`
-    const stripped = result.replace(/^<code[^>]*>/, '').replace(/<\/code>$/, '');
-    return stripped;
-  }
+  breaks: true,
+  gfm: true
 });
 
 const VIEWS_DIR = path.join(ROOT, 'src', 'views');
@@ -49,11 +32,9 @@ let posts = [];
 if (fs.existsSync(postsPath)) {
   posts = JSON.parse(fs.readFileSync(postsPath, 'utf8'));
 }
-
-// Sort by date (newest first)
 posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-// Utility: render a template and write to file
+// Render helper
 function renderTemplate(templatePath, outputPath, locals = {}) {
   const fullPath = path.join(VIEWS_DIR, templatePath);
   const html = ejs.renderFile(fullPath, locals, {}, (err, str) => {
@@ -67,23 +48,15 @@ function renderTemplate(templatePath, outputPath, locals = {}) {
 
 console.log('🏗️  Building static site...\n');
 
-// 1. Build homepage
+// Build pages
 renderTemplate('index.ejs', 'index.html', { posts });
-
-// 2. Build single post pages (clean URLs)
 posts.forEach(post => {
-  const contentHtml = marked.parse(post.content);
-  const postWithHtml = { ...post, content: contentHtml };
-  renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post: postWithHtml });
+  renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post });
 });
-
-// 3. Build admin panel
 renderTemplate('admin.ejs', 'admin.html', { posts });
-
-// 4. Build 404 page
 renderTemplate('404.ejs', '404.html', {});
 
-// 5. Copy public assets
+// Copy public assets
 function copyRecursive(src, dest) {
   const stats = fs.statSync(src);
   if (stats.isDirectory()) {
@@ -97,18 +70,18 @@ function copyRecursive(src, dest) {
 }
 copyRecursive(PUBLIC_DIR, path.join(DIST, ''));
 
-// 6. Copy highlight.js CSS (self-hosted)
-const hljsCssSrc = path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github.min.css');
-const hljsCssDest = path.join(DIST, 'css', 'highlight.min.css');
-if (fs.existsSync(hljsCssSrc)) {
-  fs.mkdirSync(path.dirname(hljsCssDest), { recursive: true });
-  fs.copyFileSync(hljsCssSrc, hljsCssDest);
+// Copy highlight.js CSS (self-hosted)
+const HLJS_CSS_SRC = path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github.min.css');
+const HLJS_CSS_DEST = path.join(DIST, 'css', 'highlight.min.css');
+if (fs.existsSync(HLJS_CSS_SRC)) {
+  fs.mkdirSync(path.dirname(HLJS_CSS_DEST), { recursive: true });
+  fs.copyFileSync(HLJS_CSS_SRC, HLJS_CSS_DEST);
   console.log('✓ css/highlight.min.css');
 } else {
-  console.warn('⚠️  highlight.js CSS not found. Install highlight.js package.');
+  console.warn('⚠️  highlight.js CSS not found. Run `npm install highlight.js`.');
 }
 
-// 7. Generate sitemap.xml
+// Generate sitemap.xml
 const baseUrl = 'https://blogs.rosyada.my.id';
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
