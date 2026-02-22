@@ -7,6 +7,7 @@ const ejs = require('ejs');
 const fs = require('fs');
 const path = require('path');
 const marked = require('marked');
+const { minify: minifyHTML } = require('html-minifier-terser');
 
 // Marked options (GFM + line breaks)
 marked.setOptions({
@@ -14,17 +15,18 @@ marked.setOptions({
   gfm: true
 });
 
-// Clean dist folder
+// Paths
 const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
+const VIEWS_DIR = path.join(ROOT, 'src', 'views');
+const PUBLIC_DIR = path.join(ROOT, 'src', 'public');
+const DATA_DIR = path.join(ROOT, 'data');
+
+// Clean dist folder
 if (fs.existsSync(DIST)) {
   fs.rmSync(DIST, { recursive: true, force: true });
 }
 fs.mkdirSync(DIST, { recursive: true });
-
-const VIEWS_DIR = path.join(ROOT, 'src', 'views');
-const PUBLIC_DIR = path.join(ROOT, 'src', 'public');
-const DATA_DIR = path.join(ROOT, 'data');
 
 // Load posts
 const postsPath = path.join(DATA_DIR, 'posts.json');
@@ -34,31 +36,35 @@ if (fs.existsSync(postsPath)) {
 }
 posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-// Render helper
-function renderTemplate(templatePath, outputPath, locals = {}) {
+// Render a template (async), returns Promise<void>
+async function renderTemplate(templatePath, outputPath, locals = {}) {
   const fullPath = path.join(VIEWS_DIR, templatePath);
-  const html = ejs.renderFile(fullPath, locals, {}, (err, str) => {
-    if (err) throw err;
-    const outPath = path.join(DIST, outputPath);
-    fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    fs.writeFileSync(outPath, str);
-    console.log(`✓ ${outputPath}`);
-  });
+  const str = await ejs.renderFile(fullPath, locals);
+  let output = str;
+  if (outputPath.endsWith('.html')) {
+    try {
+      output = await minifyHTML(str, {
+        collapseWhitespace: true,
+        removeComments: true,
+        removeEmptyAttributes: true,
+        minifyCSS: true,
+        minifyJS: true,
+        keepClosingSlash: true,
+        sortAttributes: true,
+        sortClassName: true
+      });
+    } catch (e) {
+      console.warn(`⚠️  Minification failed for ${outputPath}: ${e.message}`);
+      output = str;
+    }
+  }
+  const outPath = path.join(DIST, outputPath);
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, output);
+  console.log(`✓ ${outputPath}`);
 }
 
-console.log('🏗️  Building static site...\n');
-
-// Build pages
-renderTemplate('index.ejs', 'index.html', { posts });
-posts.forEach(post => {
-  const contentHtml = marked.parse(post.content);
-  const postWithHtml = { ...post, content: contentHtml };
-  renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post: postWithHtml });
-});
-renderTemplate('admin.ejs', 'admin.html', { posts });
-renderTemplate('404.ejs', '404.html', {});
-
-// Copy public assets
+// Copy directory recursively (sync)
 function copyRecursive(src, dest) {
   const stats = fs.statSync(src);
   if (stats.isDirectory()) {
@@ -70,22 +76,37 @@ function copyRecursive(src, dest) {
     fs.copyFileSync(src, dest);
   }
 }
-copyRecursive(PUBLIC_DIR, path.join(DIST, ''));
 
-// Copy highlight.js CSS (self-hosted)
-const HLJS_CSS_SRC = path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github.min.css');
-const HLJS_CSS_DEST = path.join(DIST, 'css', 'highlight.min.css');
-if (fs.existsSync(HLJS_CSS_SRC)) {
-  fs.mkdirSync(path.dirname(HLJS_CSS_DEST), { recursive: true });
-  fs.copyFileSync(HLJS_CSS_SRC, HLJS_CSS_DEST);
-  console.log('✓ css/highlight.min.css');
-} else {
-  console.warn('⚠️  highlight.js CSS not found. Run `npm install highlight.js`.');
-}
+// Main build (async)
+(async () => {
+  console.log('🏗️  Building static site...\n');
 
-// Generate sitemap.xml
-const baseUrl = 'https://blogs.rosyada.my.id';
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+  // Build pages
+  await renderTemplate('index.ejs', 'index.html', { posts });
+  await Promise.all(posts.map(post => {
+    const contentHtml = marked.parse(post.content);
+    return renderTemplate('post.ejs', `post/${post.slug}/index.html`, { post: { ...post, content: contentHtml } });
+  }));
+  await renderTemplate('admin.ejs', 'admin.html', { posts });
+  await renderTemplate('404.ejs', '404.html', {});
+
+  // Copy public assets
+  copyRecursive(PUBLIC_DIR, path.join(DIST, ''));
+
+  // Copy highlight.js CSS (self-hosted)
+  const HLJS_CSS_SRC = path.join(ROOT, 'node_modules', 'highlight.js', 'styles', 'github.min.css');
+  const HLJS_CSS_DEST = path.join(DIST, 'css', 'highlight.min.css');
+  if (fs.existsSync(HLJS_CSS_SRC)) {
+    fs.mkdirSync(path.dirname(HLJS_CSS_DEST), { recursive: true });
+    fs.copyFileSync(HLJS_CSS_SRC, HLJS_CSS_DEST);
+    console.log('✓ css/highlight.min.css');
+  } else {
+    console.warn('⚠️  highlight.js CSS not found.');
+  }
+
+  // Generate sitemap.xml
+  const baseUrl = 'https://blogs.rosyada.my.id';
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${baseUrl}/</loc>
@@ -100,7 +121,11 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.8</priority>
   </url>`).join('')}
 </urlset>`;
-fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemap);
-console.log('✓ sitemap.xml');
+  fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemap);
+  console.log('✓ sitemap.xml');
 
-console.log('\n✅ Build complete! The dist/ folder is ready for Cloudflare Pages.');
+  console.log('\n✅ Build complete! The dist/ folder is ready for Cloudflare Pages.');
+})().catch(err => {
+  console.error('\n❌ Build failed:', err);
+  process.exit(1);
+});
