@@ -14,10 +14,11 @@ const VIEWS_DIR = path.join(ROOT, 'src', 'views');
 const PUBLIC_DIR = path.join(ROOT, 'src', 'public');
 const DATA_DIR = path.join(ROOT, 'data');
 
-// Ensure dist exists
-if (!fs.existsSync(DIST)) {
-  fs.mkdirSync(DIST, { recursive: true });
+// Clean dist folder (remove if exists)
+if (fs.existsSync(DIST)) {
+  fs.rmSync(DIST, { recursive: true, force: true });
 }
+fs.mkdirSync(DIST, { recursive: true });
 
 // Load posts
 const postsPath = path.join(DATA_DIR, 'posts.json');
