@@ -1,7 +1,8 @@
 # Cloudflare Pages redirects
+# Let Cloudflare handle "Pretty URLs" (trailing slashes) automatically.
 
-# Ensure clean URLs for posts: /post/slug -> /post/slug/
-/post/*  /post/:suffix/  200
+# Custom 404 page for all missing routes
+/*  /404.html  404
 
-# Optional: redirect www to non-www if needed
+# Optional: redirect www to non-www
 # www.blogs.rosyada.my.id/*  https://blogs.rosyada.my.id/:splat  301
