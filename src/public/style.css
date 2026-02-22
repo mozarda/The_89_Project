@@ -327,10 +327,11 @@ body {
 .markdown-body blockquote {
   border-left: 4px solid var(--accent);
   margin: 1.5rem 0;
-  padding: 0.5rem 1rem;
-  background: rgba(52, 152, 219, 0.1);
+  padding: 1rem 1.5rem;
+  background: rgba(52, 152, 219, 0.08);
   color: var(--muted);
   font-style: italic;
+  border-radius: 0 6px 6px 0;
 }
 
 .markdown-body code {
@@ -394,6 +395,68 @@ body {
 
 .markdown-body a:hover {
   text-decoration: underline;
+}
+
+/* Callout box for Action Items */
+.markdown-body .action-item {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d1e8fa 100%);
+  border: 1px solid #b3d9ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.markdown-body .action-item h3 {
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+  color: var(--accent);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Arabic Verse Styling */
+.arabic-verse {
+  direction: rtl;
+  text-align: center;
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', 'Scheherazade New', serif;
+  font-size: 1.8rem;
+  line-height: 2.2;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  background: linear-gradient(135deg, #fdfbfb 0%, #f8f9fa 100%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.arabic-translation {
+  direction: ltr;
+  text-align: left;
+  font-style: italic;
+  color: var(--muted);
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(52, 152, 219, 0.05);
+  border-right: 3px solid var(--accent);
+}
+
+.verse-section {
+  margin: 2rem 0;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px dashed var(--border);
+}
+
+.verse-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 /* 404 */
