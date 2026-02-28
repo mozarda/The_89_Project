@@ -1,6 +1,6 @@
 # Deploy to Cloudflare Pages
 
-Target domain: `blogs.rosyada.my.id`
+Target domain: `the89project.rosyada.my.id`
 
 ## One-Click Deploy
 
@@ -30,7 +30,7 @@ Once deployed:
 
 2. Click **"Add custom domain"**
 
-3. Enter: `blogs.rosyada.my.id`
+3. Enter: `the89project.rosyada.my.id`
 
 4. Cloudflare will verify DNS - if your domain already uses Cloudflare nameservers, it will auto-verify.
 

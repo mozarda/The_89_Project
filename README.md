@@ -101,7 +101,7 @@ The_89_Project/
 3. Build settings:
    - Build command: `npm run build`
    - Output directory: `dist`
-4. Add custom domain `blogs.rosyada.my.id`
+4. Add custom domain `the89project.rosyada.my.id`
 5. Done — automatic deploys on every push to `main`
 
 Detailed steps: [docs/DEPLOY.md](./docs/DEPLOY.md)
