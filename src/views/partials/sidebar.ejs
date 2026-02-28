@@ -22,7 +22,7 @@
         <h3 class="widget-title">📚 Arsip Tulisan</h3>
         <ul class="widget-posts-list">
             <% if (sidebarPosts.length> 5) {
-                sidebarPosts.slice(5, 10).forEach(p => {
+                sidebarPosts.slice(5).forEach(p => {
                 %>
                 <li class="widget-post-item">
                     <a href="/post/<%= p.slug %>/" class="widget-post-link">
