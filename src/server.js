@@ -8,7 +8,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const marked = require('marked');
-const slugify = require('slugify');
+const helmet = require('helmet');
 
 // Marked options to match build.js
 marked.setOptions({
@@ -49,6 +49,20 @@ function savePosts(posts) {
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:"],
+    }
+  }
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -59,6 +73,11 @@ let posts = loadPosts();
 // Routes
 app.get('/', (req, res) => {
   res.render('index', { posts });
+});
+
+// Admin route (read-only)
+app.get('/admin', (req, res) => {
+  res.render('admin', { posts });
 });
 
 app.get('/post/:slug', (req, res) => {

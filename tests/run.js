@@ -45,6 +45,8 @@ const req = http.request(options, (res) => {
         console.log('✅ Admin panel accessible');
 
         console.log('📝 All core tests passed! Blog is ready.');
+        // Close server and exit
+        setTimeout(() => process.exit(0), 100);
       });
     });
     adminReq.on('error', (e) => console.error('❌ Admin page error:', e));
@@ -63,3 +65,6 @@ req.setTimeout(3000, () => {
   console.error('❌ Server took too long to respond');
   process.exit(1);
 });
+
+// Send the request
+req.end();

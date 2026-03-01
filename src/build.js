@@ -81,7 +81,15 @@ function copyRecursive(src, dest) {
 (async () => {
   console.log('🏗️  Building static site...\n');
 
-  // Build pages
+  // Validate slugs to prevent path traversal
+  posts.forEach(post => {
+    if (post.slug.includes('..') || post.slug.includes('/') || post.slug.includes('\\')) {
+      console.error(`❌ Invalid slug detected: ${post.slug} (contains path traversal sequences)`);
+      process.exit(1);
+    }
+  });
+
+// Build pages
   await renderTemplate('index.ejs', 'index.html', { posts, allPosts: posts });
   await Promise.all(posts.map(post => {
     const contentHtml = marked.parse(post.content);
