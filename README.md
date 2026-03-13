@@ -54,6 +54,19 @@ To add a post:
 5. Ensure `"published": true`
 6. Run `npm run build` and commit
 
+### ⚠️ Required Fields Checklist
+
+Every post **must** have these fields:
+- `id` (number, sequential)
+- `title` (string)
+- `slug` (string, URL-safe)
+- `excerpt` (string)
+- `content` (string with `\n` line breaks)
+- `date` (string, ISO 8601 format) — **MISSING THIS WILL BREAK THE SITE**
+- `published` (boolean, `true`)
+
+**Common mistake:** Forgetting the `date` field → shows "Invalid date" on website. Ensure all posts have a valid date string (e.g., `"2026-03-13T09:00:00.000Z"`).
+
 Example:
 ```json
 {
